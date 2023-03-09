@@ -16,7 +16,7 @@
         }
     </script>
 
-    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/jquery.min.js"></script>
     <link rel="icon" href="img/chat.ico" type="image/x-icon"/>
     <link rel="stylesheet" href="css/font-awesome.css"/> <!-- Font-Awesome-Icons-CSS -->
     <link rel="stylesheet" href="css/login.css" type="text/css" media="all"/> <!-- Style-CSS -->
@@ -32,7 +32,7 @@
         <h2>登录</h2>
         <form id="loginForm">
             <div class="icon1">
-                <input placeholder="用户名" id="username" v-model="user.username" type="text"/>
+                <input placeholder="用户名" id="username" v-model="user.userName" type="text"/>
             </div>
 
             <div class="icon2">
@@ -59,19 +59,22 @@
             return {
                 errMessage: "",
                 user:{
-                    username:"",
+                    userName:"",
                     password:""
                 }
             }
         },
+        computed: {},
         methods: {
             login() {
-                axios.post("user/login",this.user).then(res => {
-                    //判断登陆是否成功
-                    if(res.data.flag) {
+                axios.post("/user/login",this.user).then(res => {
+                    console.log(res)
+                    if(res.data.code === 1) {
+                        localStorage.setItem('userInfo', JSON.stringify(res.data))
                         location.href = "main.html"
                     } else {
                         this.errMessage = res.data.message;
+                        location.href = "login.html"
                     }
                 });
             }

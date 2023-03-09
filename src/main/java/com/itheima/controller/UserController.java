@@ -1,15 +1,22 @@
 package com.itheima.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.itheima.common.R;
 import com.itheima.pojo.Result;
 import com.itheima.pojo.User;
+import com.itheima.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
 
 @RestController
-@RequestMapping("user")
+@RequestMapping("/user")
 public class UserController {
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 登陆
@@ -18,17 +25,18 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
-    public Result login(@RequestBody User user, HttpSession session) {
-        Result result = new Result();
-        if(user != null && "123".equals(user.getPassword())) {
-            result.setFlag(true);
-            //将数据存储到session对象中
-            session.setAttribute("user",user.getUsername());
+    public R<User> login(@RequestBody User user, HttpSession session) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUserName,user.getUserName());
+        queryWrapper.eq(User::getPassword,user.getPassword());
+        User one = userService.getOne(queryWrapper);
+        if(one == null) {
+            return R.error("查无此账号");
         } else {
-            result.setFlag(false);
-            result.setMessage("登陆失败");
+            //将数据存储到session对象中
+            session.setAttribute("user",user.getUserName());
+            return R.success(one);
         }
-        return result;
     }
 
     /**
@@ -36,7 +44,7 @@ public class UserController {
      * @param session
      * @return
      */
-    @GetMapping("/getUsername")
+    @GetMapping("/getusername")
     public String getUsername(HttpSession session) {
 
         String username = (String) session.getAttribute("user");

@@ -152,7 +152,7 @@
         },
         methods: {
             async init() {
-                await axios.get("user/getUsername").then(res => {
+                await axios.get("/user/getusername").then(res => {
                     this.username = res.data;
                 });
 
