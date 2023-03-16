@@ -2,25 +2,40 @@ package com.itheima.ws;
 
 
 import com.alibaba.fastjson.JSON;
-import com.itheima.config.GetHttpSessionConfig;
+import com.itheima.config.WebsocketConfig;
+import com.itheima.pojo.UserMessage;
+import com.itheima.service.UserMessageService;
 import com.itheima.utils.MessageUtils;
 import com.itheima.ws.pojo.Message;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-@ServerEndpoint(value = "/chat",configurator = GetHttpSessionConfig.class)
+@ServerEndpoint(value = "/chat",configurator = WebsocketConfig.class)
 @Component
 @Slf4j
 public class ChatEndpoint {
 
     private static final Map<String,Session> onlineUsers = new ConcurrentHashMap<>();
+
+    //新建list集合存储数据
+    private static ArrayList<UserMessage> MessageList = new ArrayList<>();
+    //设置一次性存储数据的list的长度为固定值，每当list的长度达到固定值时，向数据库存储一次
+    private static final Integer LIST_SIZE =3;
+
+    //静态成员变量，全局
+    public static UserMessageService userMessageService;
+    @Autowired
+    public void setUserMessageService(UserMessageService userMessageService) {
+       ChatEndpoint.userMessageService = userMessageService;
+    }
 
     private HttpSession httpSession;
 
@@ -87,6 +102,22 @@ public class ChatEndpoint {
             String user = (String) this.httpSession.getAttribute("user");
             String msg1 = MessageUtils.getMessage(false, user, mess);
             session.getBasicRemote().sendText(msg1);
+            //新建message对象，存储交流信息
+            UserMessage message1 = new UserMessage();
+            message1.setUsername(user);
+            message1.setToname(toName);
+            message1.setMessage(mess);
+            message1.setCreatetime(String.valueOf(LocalDateTime.now()));
+            //批量保存信息
+            //将每条记录添加到list集合中
+            MessageList.add(message1);
+            //判断list集合长度
+            if(MessageList.size() == LIST_SIZE){
+                userMessageService.saveBatch(MessageList);
+                //清空集合
+                MessageList.clear();
+            }
+
         }catch (Exception e){
           //记录日志
         }
@@ -104,6 +135,12 @@ public class ChatEndpoint {
      */
     @OnClose
     public void onClose(Session session){
+        //判断list集合长度
+        if(MessageList.size() <= LIST_SIZE){
+            userMessageService.saveBatch(MessageList);
+            //清空集合
+            MessageList.clear();
+        }
         //1.从onlineUsers中剔除当前用户的session对象
         String user = (String) this.httpSession.getAttribute("user");
         onlineUsers.remove(user);
