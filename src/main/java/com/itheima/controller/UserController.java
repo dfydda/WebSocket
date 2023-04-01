@@ -1,14 +1,19 @@
 package com.itheima.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.common.R;
 import com.itheima.pojo.Result;
 import com.itheima.pojo.User;
+import com.itheima.pojo.UserMessage;
+import com.itheima.service.UserMessageService;
 import com.itheima.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @RestController
@@ -17,6 +22,10 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserMessageService userMessageService;
+
 
     /**
      * 登陆
@@ -49,5 +58,18 @@ public class UserController {
 
         String username = (String) session.getAttribute("user");
         return username;
+    }
+    @GetMapping("/historyshow")
+    public R<List<UserMessage>> historyShow(HttpSession session){
+        String username = (String) session.getAttribute("user");
+        //新建list集合存储数据
+        LambdaQueryWrapper<UserMessage> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserMessage::getUsername,username);
+        List<UserMessage> historyList =userMessageService.list(queryWrapper);
+        LambdaQueryWrapper<UserMessage> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(UserMessage::getToname,username);
+        List<UserMessage> historyList1 = userMessageService.list(queryWrapper1);
+        historyList.addAll(historyList1);
+        return R.success(historyList);
     }
 }
