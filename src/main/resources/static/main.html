@@ -163,25 +163,29 @@
                     if(res.data.code === 1){
                         for(i=0;i<res.data.data.length;i+=1){
                             if(this.username === res.data.data[i].username){
-                                let params = {
-                                    toName :'',
-                                    message : '',
-                                    createTime : ''
+                                if(this.toname === res.data.data[i].toname) {
+                                    let params = {
+                                        toName: '',
+                                        message: '',
+                                        createTime: ''
+                                    }
+                                    params.toName = res.data.data[i].toname;
+                                    params.message = res.data.data[i].message;
+                                    params.createTime = res.data.data[i].createtime;
+                                    this.historyMessage.push(params)
                                 }
-                                params.toName = res.data.data[i].toname;
-                                params.message = res.data.data[i].message;
-                                params.createTime = res.data.data[i].createtime;
-                                this.historyMessage.push(params)
                             }else{
-                                let params1 = {
-                                    fromName :'',
-                                    message : '',
-                                    createTime : ''
+                                if(this.toname === res.data.data[i].username) {
+                                    let params1 = {
+                                        fromName: '',
+                                        message: '',
+                                        createTime: ''
+                                    }
+                                    params1.fromName = res.data.data[i].username;
+                                    params1.message = res.data.data[i].message;
+                                    params1.createTime = res.data.data[i].createtime;
+                                    this.historyMessage.push(params1)
                                 }
-                                params1.fromName = res.data.data[i].username;
-                                params1.message = res.data.data[i].message;
-                                params1.createTime = res.data.data[i].createtime;
-                                this.historyMessage.push(params1)
                             }
                         }
                         if(this.historyMessage === null){
