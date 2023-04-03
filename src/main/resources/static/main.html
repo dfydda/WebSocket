@@ -48,7 +48,7 @@
                         <div class="pnl-list" id="hists" style="text-align: center;font-size: 16px" v-if="isShowhistory ===true">
                             <a @click="history">历史消息</a>
                         </div>
-                        <div class="pnl-list" id="msgs" v-for="message in historyMessage">
+                        <div class="pnl-list" id="msgs" v-for="message in historyMessage" :key="message.createTime">
                             <!-- 消息这展示区域 -->
                             <div class="msg guest" v-if="message.fromName">
                                 <div class="msg-right">
@@ -165,18 +165,22 @@
                             if(this.username === res.data.data[i].username){
                                 let params = {
                                     toName :'',
-                                    message : ''
+                                    message : '',
+                                    createTime : ''
                                 }
                                 params.toName = res.data.data[i].toname;
                                 params.message = res.data.data[i].message;
+                                params.createTime = res.data.data[i].createtime;
                                 this.historyMessage.push(params)
                             }else{
                                 let params1 = {
                                     fromName :'',
-                                    message : ''
+                                    message : '',
+                                    createTime : ''
                                 }
                                 params1.fromName = res.data.data[i].username;
                                 params1.message = res.data.data[i].message;
+                                params1.createTime = res.data.data[i].createtime;
                                 this.historyMessage.push(params1)
                             }
                         }

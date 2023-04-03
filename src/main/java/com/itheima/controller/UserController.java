@@ -64,12 +64,13 @@ public class UserController {
         String username = (String) session.getAttribute("user");
         //新建list集合存储数据
         LambdaQueryWrapper<UserMessage> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserMessage::getUsername,username);
+        queryWrapper.eq(UserMessage::getUsername,username)
+                .or().eq(UserMessage::getToname,username);
         List<UserMessage> historyList =userMessageService.list(queryWrapper);
-        LambdaQueryWrapper<UserMessage> queryWrapper1 = new LambdaQueryWrapper<>();
-        queryWrapper1.eq(UserMessage::getToname,username);
-        List<UserMessage> historyList1 = userMessageService.list(queryWrapper1);
-        historyList.addAll(historyList1);
+//        LambdaQueryWrapper<UserMessage> queryWrapper1 = new LambdaQueryWrapper<>();
+//        queryWrapper1.eq(UserMessage::getToname,username);
+//        List<UserMessage> historyList1 = userMessageService.list(queryWrapper1);
+//        historyList.addAll(historyList1);
         return R.success(historyList);
     }
 }
